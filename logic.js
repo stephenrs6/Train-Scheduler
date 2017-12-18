@@ -42,12 +42,11 @@ trainData.ref().on("child_added", function (childSnapshot, prevChildKey) {
   var tDestination = childSnapshot.val().destination;
   var tFrequency = childSnapshot.val().frequency;
   var tFirstTrain = childSnapshot.val().firstTrain;
-  console.log(tFrequency);
-  console.log(childSnapshot.val());
   
   var timeArr = tFirstTrain.split(":");
 
   var trainTime = moment().hours(timeArr[0]).minutes(timeArr[1]);
+
   var maxMoment = moment.max(moment(), trainTime);
   var tMinutes;
   var tArrival;
@@ -59,7 +58,7 @@ trainData.ref().on("child_added", function (childSnapshot, prevChildKey) {
     // calculate minutes till arrival (take current time in unix subtract firstTrain time, and find modulus between the difference and frequency)
     var differenceTimes = moment().diff(trainTime, "minutes");
     var tRemainder = differenceTimes % tFrequency;
-    tMinutes = tFreqency - tRemainder;
+    tMinutes = tFrequency - tRemainder;
     // to calculate arrival time, add tMinutes to the current time
     tArrival = moment().add(tMinutes, "m").format("hh:mm A");
   }
