@@ -1,87 +1,67 @@
-// Initialize Firebase
-var config = {
-  apiKey: "AIzaSyAnJgn9qMd4nnsCe14YjdHMwPIaMRo4YQQ",
-  authDomain: "employeesheet-4f891.firebaseapp.com",
-  databaseURL: "https://employeesheet-4f891.firebaseio.com",
-  projectId: "employeesheet-4f891",
-  storageBucket: "employeesheet-4f891.appspot.com",
-  messagingSenderId: "313994607792"
-};
-firebase.initializeApp(config);
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyAonW-4g7HGjBqhEh9WWlCcsn46vhJAiNQ",
+    authDomain: "train-scheduler-2779e.firebaseapp.com",
+    databaseURL: "https://train-scheduler-2779e.firebaseio.com",
+    projectId: "train-scheduler-2779e",
+    storageBucket: "train-scheduler-2779e.appspot.com",
+    messagingSenderId: "761804100897"
+  };
+  firebase.initializeApp(config);
 var database = firebase.database();
 
-var employeesRef = database.ref("/employeeData");
+// On click, grab user inputs for train info
+$("#submit-btn").on("click", function () {
+  var trainName = $("#trainName").val().trim();
+  var destination = $("#destination").val().trim();
+  var firstTrain = $("#firstTrain").val().trim();
+  var frequency = $("#frequency").val().trim();
 
-var name = "name";
-var role = "employee";
-var startDate = "";
-var rate = 0;
-var months = 0;
-var total = 0;
+  // (?)holds train data in local temporary object
+  var newTrain = {
+    name: trainName,
+    destination: destination,
+    furstTrain: firstTrain,
+    frequency: frequency
+  };
+  // upload train data to database
+  trainData.ref().push(newTrain);
+  // clear input field text boxes
+  $("#trainName").val("");
+  $("#destination").val("");
+  $("#firstTrain").val("");
+  $("#frequency").val("");
 
-$(document).ready(function () {
-  $('#submit-btn').on('click', function (event) {
-    event.preventDefault()
-
-    getparams();
-    database.ref("/employeeData").push({
-        employeeName: name,
-        employeeRole: role,
-        employeeStartDate: startDate,
-        employeeMonths: JSON.stringify(months),
-        employeeRate: rate,
-      })
-  })
-})
-
-database.ref("/employeeData").on("child_added", function (childSnapshot) {
-    
-      // If Firebase has a highPrice and highBidder stored (first case)
-      if (childSnapshot.child("employeeName").exists() && childSnapshot.child("employeeRole").exists()) {
-        console.log(childSnapshot.val());
-        // Set the local variables for highBidder equal to the stored values in firebase.
-        name = childSnapshot.val().employeeName;
-        role = childSnapshot.val().employeeRole;
-        startDate = childSnapshot.val().employeeStartDate;
-        months = childSnapshot.val().employeeMonths;
-        rate = childSnapshot.val().employeeRate;
-        
-        calculateRate();
-        addEmployee(name, role, startDate, months, rate, total);
-      }
+  // (?)determine when next train arrives
+  return false;
 });
+// create firebase event for adding trains to the database and a row in the html when a user adds an entry 
+trainData.ref().on("child_added", function (childSnapshot, prevChildKey) {
+  // store things into variable
+  var tName = childSnapshot.val().trainName;
+  var tDestination = childSnapshot.val().destination;
+  var tFrequency = childSnapshot.val().freqency;
+  var tFirstTrain = childSnapshot.val().firstTrain;
 
+  var timeArr = tFirstTrain.split(":");
+  var trainTime = moment().hours(timeArr[0]).minutes(timeArr[1]);
+  var maxMoment = moment.max(momemnt(), trainTime);
+  var tMinutes;
+  var tArrival;
+  // if first train is later than current time, set arrival to the first train's time
+  if (maxMoment === trainTime) {
+    tArrival = trainTime.format("hh:mm A");
+    tMinutes = trainTime.diff(moment(), "minutes");
+  } else {
+    // calculate minutes till arrival (take current time in unix subtract firstTrain time, and find modulus between the difference and frequency)
+    var differenceTimes = moment().diff(trainTime, "minutes");
+    var tRemainder = differenceTimes % tFrequency;
+    tMinutes = tFreqency - tRemainder;
+    // to calculate arrival time, add tMinutes to the current time
+    tArrival = moment().add(tMinutes, "m").format("hh:mm A");
+  }
+  // Add each train's data into the table
+  $("#train-table > tbody").append("<tr><td>" + tName + "</td><td>" + tDestination + "</td><td>" +
+    tFrequency + "</td><td>" + tArrival + "</td><td>" + tMinutes + "</td></tr>");
 
-function addEmployee (name, role, startDate, months, rate, total) {
-  
-
-  var employeeRow = $('<tr>')
-  var employeeName = $('<td>' + name + '</td>')
-  var employeeRole = $('<td>' + role + '</td>')
-  var employeeStartDate = $('<td>' + startDate + '</td>')
-  var employeeMonths = $('<td>' + months + '</td>')
-  var employeeRate = $('<td>' + rate + '</td>')
-  var employeeTotalBilled = $('<td>' + total + '</td>')
-
-  employeeRow.append(employeeName)
-  employeeRow.append(employeeRole)
-  employeeRow.append(employeeMonths)
-  employeeRow.append(employeeRate)
-  employeeRow.append(employeeTotalBilled)
-
-  $('#employee-info').append(employeeRow)
-}
-
-function getparams () {
-  name = $('#name').val().trim()
-  role = $('#role').val().trim()
-  startDate = $('#start-date').val().trim()
-  rate = $('#rate').val().trim()
-}
-
-function calculateRate() {
-  var today = moment();
-
-  months = JSON.stringify(moment(today).diff(startDate, 'months'));
-  total = JSON.stringify(months * rate);
-}
+});
