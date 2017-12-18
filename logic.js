@@ -8,7 +8,7 @@
     messagingSenderId: "761804100897"
   };
   firebase.initializeApp(config);
-var database = firebase.database();
+var trainData = firebase.database();
 
 // On click, grab user inputs for train info
 $("#submit-btn").on("click", function () {
@@ -21,7 +21,7 @@ $("#submit-btn").on("click", function () {
   var newTrain = {
     name: trainName,
     destination: destination,
-    furstTrain: firstTrain,
+    firstTrain: firstTrain,
     frequency: frequency
   };
   // upload train data to database
@@ -38,14 +38,17 @@ $("#submit-btn").on("click", function () {
 // create firebase event for adding trains to the database and a row in the html when a user adds an entry 
 trainData.ref().on("child_added", function (childSnapshot, prevChildKey) {
   // store things into variable
-  var tName = childSnapshot.val().trainName;
+  var tName = childSnapshot.val().name;
   var tDestination = childSnapshot.val().destination;
-  var tFrequency = childSnapshot.val().freqency;
+  var tFrequency = childSnapshot.val().frequency;
   var tFirstTrain = childSnapshot.val().firstTrain;
-
+  console.log(tFrequency);
+  console.log(childSnapshot.val());
+  
   var timeArr = tFirstTrain.split(":");
+
   var trainTime = moment().hours(timeArr[0]).minutes(timeArr[1]);
-  var maxMoment = moment.max(momemnt(), trainTime);
+  var maxMoment = moment.max(moment(), trainTime);
   var tMinutes;
   var tArrival;
   // if first train is later than current time, set arrival to the first train's time
