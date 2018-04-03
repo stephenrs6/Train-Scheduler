@@ -11,7 +11,8 @@
 var trainData = firebase.database();
 
 // On click, grab user inputs for train info
-$("#submit-btn").on("click", function () {
+$("#submit-btn").on("click", function (e) {
+  e.preventDefault();
   var trainName = $("#trainName").val().trim();
   var destination = $("#destination").val().trim();
   var firstTrain = $("#firstTrain").val().trim();
@@ -33,7 +34,7 @@ $("#submit-btn").on("click", function () {
   $("#frequency").val("");
 
   // (?)determine when next train arrives
-  return false;
+  // return false;
 });
 // create firebase event for adding trains to the database and a row in the html when a user adds an entry 
 trainData.ref().on("child_added", function (childSnapshot, prevChildKey) {
