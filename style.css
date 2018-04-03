@@ -1,20 +1,20 @@
 .jumbotron {
     text-align: center;
-    background-color: rgb(124, 70, 45);
+    background-color: teal;
     color: white;
 }
 
 .panel-default .panel-heading {
-    background-color: rgb(33, 33, 133);
+    background-color: teal;
     color: white;
 }
 
 .panel {
-    border: 2px solid rgb(33, 33, 133);
+    border: 2px solid teal;
 }
 
 .btn {
-    background-color: rgb(33, 33, 133);
+    background-color: teal;
     color: white;
 }
 
